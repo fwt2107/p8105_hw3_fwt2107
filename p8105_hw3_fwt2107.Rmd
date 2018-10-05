@@ -11,4 +11,38 @@ library(tidyverse)
 library(ggridges)
 ```
 
+# Problem 1
+
+## Data cleaning
+This block of code loads and cleans the BRFSS data:
+
+1. Load the BRFSS data from the p8105.datasets package
+
+2. Clean the variable names
+
+3. Only keep the observations related to the Overall Health topic
+
+4. Remove unneeded variables
+
+5. Transform **response** into a factor with the values ordered
+from "Excellent" to "Poor"
+
+6. Separate **locationdesc** into 2 variables (**state** and **location**) for 
+the state and site for each observation
+
+7. Remove the redundant **locationabbr** variable
+```{r}
+library(p8105.datasets)
+brfss_df <- brfss_smart2010 %>% 
+  janitor::clean_names() %>%
+  filter(topic == "Overall Health") %>%
+  select(-class, -topic,  -question, -sample_size,
+          -c(confidence_limit_low:geo_location)) %>%
+  mutate(response = forcats::fct_relevel(response, "Excellent", "Very good",
+                                         "Good", "Fair", "Poor")) %>% 
+  separate(locationdesc, into = c('state', 'location'), sep = ' - ') %>%
+  select(-locationabbr)
+
+brfss_df
+```
 
