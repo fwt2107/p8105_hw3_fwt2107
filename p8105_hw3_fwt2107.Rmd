@@ -46,3 +46,26 @@ brfss_df <- brfss_smart2010 %>%
 brfss_df
 ```
 
+## Answering questions about the data
+### States observed at 7 locations in 2002
+3 states were observed at 7 locations in 2002: Connecticut, Florida, and 
+North Carolina.
+
+Using the brfss_df dataset:
+
+1. Filter observations to only look at observations from 2002
+
+2. Group by **state**
+
+3. Count the number of unique **location** values and only see the states with 7
+location sites
+```{r}
+brfss_df %>% 
+  filter(year == '2002') %>% 
+  group_by(state) %>%
+  summarize(num_sites = length(unique(location))) %>% 
+  filter(num_sites == 7)
+```
+
+
+### Spaghetti plot
