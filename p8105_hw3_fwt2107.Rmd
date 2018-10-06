@@ -96,3 +96,29 @@ brfss_df %>%
         plot.title = element_text(size = 13))
 ```
 
+
+### Table describing "Excellent" responses in NY (2002, 2006, 2010)
+1. Subset the brfss data to only look at "excellent" responses for NY
+
+2. Group observations by year
+
+3. Calculate the mean and standard deviation for proportion of "excellent" 
+responses in NY by year
+
+4. Keep the means and standard deviations for the years 2002, 2006, 2010
+
+5. Display results in table
+```{r}
+brfss_df %>% 
+  filter(state == "NY", response == "Excellent") %>% 
+  group_by(year) %>% 
+  summarize(mean_excellent = mean(data_value, na.rm = T), 
+            sd_excellent = sd(data_value, na.rm = T)) %>% 
+  filter(year == "2002" | year == "2006" | year == "2010") %>% 
+  knitr::kable(col.names = c("Year", "Mean", "Standard deviation"), 
+               digits = 1,
+               format = 'html',
+               caption = "Proportion of 'excellent' responses in NY by year")
+  
+```
+
