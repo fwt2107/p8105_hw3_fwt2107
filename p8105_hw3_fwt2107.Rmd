@@ -165,7 +165,7 @@ brfss_df %>%
        x = "Year",
        y = "Proportion of responses (%)") +
   scale_x_continuous(breaks = c(2002, 2006, 2010),
-                     labels = c("2002", "2006","2010")) +
+                     labels = c("2002", "2006", "2010")) +
   facet_grid(. ~ response, 
              labeller = labeller(response = c(excellent = "Excellent",
                                              verygood = "Very good",
@@ -355,3 +355,109 @@ Among the days for which data was available, average precipiation was
 mm, average lowest temperature was `r noaa_summary$mean_tmin/10` degrees 
 Celsius, and average max temperature `r noaa_summary$mean_tmax/10` 
 degrees Celsius.
+
+## Answering questions
+### Data cleaning and snowfall
+
+To clean the data:
+
+1. Transform the **date** variable into 3 variables for the year, month, and
+day.
+
+2. Convert the units for temperature from tenths of degrees Celsius to degrees
+Celsius and precipitation and snowfall from tenths of mm to mm.
+
+
+To obtain the most frequent observations for snow:
+
+1. Group by snowfall observations
+
+2. Count the frequency of each observation
+
+3. Rank the frequencies and look at the most frequent observations
+
+The most frequent values for snowfall are NA and 0. This makes sense because 
+there is no snowfall for the majority of the year. Snowfall for most days
+will either be recorded as 0 or not recorded at all.
+```{r}
+noaa_df <- noaa_df %>% 
+  separate(date, into = c("year", "month", "day"), sep = "-") %>% 
+  mutate(tmin = as.integer(tmin) / 10, 
+         tmax = as.integer(tmax) / 10,
+         prcp = prcp / 10,
+         snow = snow / 10,
+         year = as.integer(year),
+         month = as.integer(month),
+         day = as.integer(day))
+
+noaa_df %>% 
+  group_by(snow) %>% 
+  summarize(frequency = n()) %>% 
+  mutate(freq_rank = min_rank(desc(frequency))) %>% 
+  filter(freq_rank <= 5) %>% 
+  arrange(freq_rank)
+```
+
+### 2-panel plot 
+To make the plot:
+
+1. Filter out observations outside of January or July
+
+2. Group by station ID, year, and month
+
+3. Calculate average temperature by taking the average of the lowest and highest
+temperature recorded at each station
+
+4. Calculate the average temperature across stations for each month by year
+
+5. Plot results across time by month
+```{r}
+noaa_df %>% 
+  filter(month == 1 | month == 7) %>% 
+  group_by(id, year, month) %>% 
+  mutate(tmean_daily = (tmax + tmin)/2) %>% 
+  summarize(tmean_monthly = round(mean(tmean_daily, na.rm = T), digits = 1)) %>% 
+  ggplot(aes(x = year, y = tmean_monthly)) +
+  geom_point(size = 0.1) +
+  scale_x_continuous(breaks = c(1981, 1989, 1997, 2005, 2013),
+                     labels = c('1981', '1989', '1997', 
+                                '2005', '2013')) +
+  facet_grid(. ~ month) +
+  theme(legend.position = 'none',
+        panel.spacing.x = unit(0.5, "lines"),
+        axis.text.x = element_text(size = 8))
+
+```
+
+As expected, average temperatures are lower in January compared to July. There
+does not appear to be a discrenable pattern among these 2 months. There are a 
+couple outliers in January where the average temperature was especially cold 
+compared to preceding and subsequent years.
+
+
+### Lowest and highest temperatures and snowfall plots
+```{r}
+library(patchwork)
+temp_graph <- noaa_df %>% 
+  gather(key = temp_type, value = temp_c, c(tmax, tmin)) %>% 
+  ggplot(aes(x = temp_type, y = temp_c)) +
+  labs(title = 'Distribution of max and min temperatures',
+       x = element_blank()) +
+  geom_boxplot()
+
+noaa_snow_df <- noaa_df %>% 
+  filter(snow > 0 & snow < 100) %>% 
+  mutate(year = as.character(year))
+
+snow_graph <- noaa_snow_df %>% 
+  ggplot(aes(x = year, y = snow)) +
+  geom_violin() +
+  labs(title = "Distribution of snowfall by year") +
+  theme(axis.text.x = element_text(size = 6, angle = 90))
+
+temp_graph / snow_graph
+```
+
+Looking at the top graph, lowest recorded temperatures appear to have more
+outliers than max recorded temperatures. Snowfall distributions by year seem
+to be relatively consistent.
