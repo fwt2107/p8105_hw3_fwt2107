@@ -307,3 +307,51 @@ cart_df %>%
 
 With the exception of Day 5, pink lady apples on average are bought slightly 
 earlier in the day than coffee ice cream.
+
+
+
+# Problem 3
+```{r echo = F}
+noaa_df <- ny_noaa
+
+noaa_df
+noaa_summary <- noaa_df %>%
+  mutate(tmax = as.integer(tmax), tmin = as.integer(tmin)) %>%
+  summarize(mean_prcp = round(mean(prcp, na.rm = T), digits = 1),
+            mean_snow = round(mean(snow, na.rm = T), digits = 1),
+            mean_snwd = round(mean(snwd, na.rm = T), digits = 1),
+            mean_tmin = round(mean(tmin, na.rm = T), digits = 1),
+            mean_tmax = round(mean(tmax, na.rm = T), digits = 1))
+prcp_na <- round((length(which(is.na(noaa_df$prcp))) / nrow(noaa_df) * 100), 
+                 digits = 1)
+snow_na <- round((length(which(is.na(noaa_df$snow))) / nrow(noaa_df) * 100), 
+                 digits = 1)
+snwd_na <- round((length(which(is.na(noaa_df$snwd))) / nrow(noaa_df) * 100), 
+                 digits = 1)
+tmin_na <- round((length(which(is.na(noaa_df$tmin))) / nrow(noaa_df) * 100), 
+                 digits = 1)
+tmax_na <- round((length(which(is.na(noaa_df$tmax))) / nrow(noaa_df) * 100), 
+                 digits = 1)
+prcp_na
+snow_na
+snwd_na
+tmin_na
+tmax_na
+summary(noaa_df$date)
+```
+The dataset contains `r nrow(noaa_df)` observations and `r ncol(noaa_df)` 
+variables. The data tracks precipitation, snow, snowdepth, max temperature, and
+lowest temperature in NY on observed days from January 1, 1981, to December 31,
+2012. 
+
+Missing data is a big issue with this data. `r prcp_na`% of recorded days had
+missing precipitation data, `r snow_na`% had missing snow data, `r snwd_na`% had
+missing snow depth data, `r tmin_na`% had missing lowest temperature data, and
+`r tmax_na`% had missing max temperature data.
+
+Among the days for which data was available, average precipiation was 
+`r noaa_summary$mean_prcp/10` mm, average snowfall was 
+`r noaa_summary$mean_snow` mm, average snowdepth was `r noaa_summary$mean_snwd` 
+mm, average lowest temperature was `r noaa_summary$mean_tmin/10` degrees 
+Celsius, and average max temperature `r noaa_summary$mean_tmax/10` 
+degrees Celsius.
