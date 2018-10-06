@@ -96,6 +96,9 @@ brfss_df %>%
         plot.title = element_text(size = 13))
 ```
 
+Most states had less than 5000 observations per year. Only a few states had more
+than 10,000 observations for at least 1 year of data collection.
+
 
 ### Table describing "Excellent" responses in NY (2002, 2006, 2010)
 1. Subset the brfss data to only look at "excellent" responses for NY
@@ -121,6 +124,8 @@ brfss_df %>%
                caption = "Proportion of 'excellent' responses in NY by year")
 ```
 
+The proportion of "Excellent" responses has decreased slightly from 2002 to
+2010. The standard deviation has decreased from 2002 to 2010. 
 
 ### 5 panel plot of responses over time
 1. Spread the values of the **response** variable so that each answer choice in
@@ -171,4 +176,57 @@ brfss_df %>%
         axis.text = element_text(size = 5),
         panel.spacing.x = unit(0.5, "lines"))
 ```
+
+On average, the proportion of "Excellent" responses has decreased slightly 
+over time across states. The proportion of "Very good" and "Good" responses
+had substantial variation over time across states. The proportion of "Fair" 
+responses had less variation over time. The proportion of "Poor" responses 
+remained fairly consistent over time across states at close to 5% of all
+responses. 
+
+# Problem 2
+## Describing the data
+```{r echo = F}
+cart_df <- instacart
+
+order_history_df <- cart_df %>% 
+  group_by(user_id) %>% 
+  summarize(total_orders = max(order_number)) 
+avg_total_orders <- round(mean(order_history_df$total_orders), digits = 0)
+
+order_size_df <- cart_df %>% 
+  group_by(order_id) %>% 
+  summarize(num_items = max(add_to_cart_order))
+avg_order_size <- round(mean(order_size_df$num_items), digits = 0)
+
+```
+* The dataset contains `r nrow(cart_df)` observations and 
+`r ncol(cart_df)` variables. Each observation is 1 food item bought in an order.
+
+* The dataset contains `r length(unique(cart_df$user_id))` unique users with 
+`r length(unique(cart_df$order_id))` total orders. 
+
+* Users in this dataset have placed `r avg_total_orders` orders on average 
+through Instacart thus far, waiting about 
+`r round(mean(cart_df$days_since_prior_order, na.rm = T), digits = 0)` days 
+before placing another order.
+
+* On average, `r avg_order_size` items are purchased per order.
+
+* Users in this dataset have ordered items from 
+`r length(unique(cart_df$department))` different departments.
+
+## Answering questions
+### Aisles
+There are `r length(unique(cart_df$aisle))` aisles, and the most items are 
+ordered from fresh vegetables, fresh fruit, packaged fruits and vegetables,
+yogurt, and packaged cheese.
+```{r}
+cart_df %>% 
+  group_by(aisle) %>% 
+  summarize(total_items = n()) %>% 
+  arrange(desc(total_items))
+```
+
+### Items ordered per aisle
 
