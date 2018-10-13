@@ -216,6 +216,26 @@ before placing another order.
 * Users in this dataset have ordered items from 
 `r length(unique(cart_df$department))` different departments.
 
+```{r}
+cart_df %>% 
+  group_by(order_dow) %>% 
+  summarize(total_orders = n()) %>%
+  ggplot(aes(x = order_dow, y = total_orders)) +
+  geom_bar(stat = "identity") +
+  labs(title = "# of orders by day (0 - 6)")
+
+cart_df %>% 
+  group_by(order_hour_of_day) %>% 
+  summarize(total_orders = n()) %>%
+  ggplot(aes(x = order_hour_of_day, y = total_orders)) +
+  geom_bar(stat = "identity") +
+  labs(title = "# of orders by hour of day (0 - 23)")
+```
+Day 0 has more orders than any other day. Most orders are placed between
+hours 10 - 16, i.e. 10am-4pm.
+
+
+
 ## Answering questions
 ### Aisles
 There are `r length(unique(cart_df$aisle))` aisles, and the most items are 
